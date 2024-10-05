@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: com.t3h.vn.Main
+Main-Class: com.pika.desktop.app.Main
 
