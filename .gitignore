@@ -29,6 +29,7 @@ pom.xml.versionsBackup
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+out
 
 ### VS Code ###
 .vscode/

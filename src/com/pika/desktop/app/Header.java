@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class Header extends JPanel implements Constants {
+import static com.pika.desktop.app.Constants.HEIGHT_FRAME;
+import static com.pika.desktop.app.Constants.HEIGHT_HEADER;
+import static com.pika.desktop.app.Constants.WIDTH_FRAME;
+
+public class Header extends JPanel {
   private final Image imgBg;
   private final List<Button> button;
   private final Image icon = new ImageIcon(FilePathUtils.getURL("src/imgs/next2.png")).getImage();

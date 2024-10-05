@@ -19,7 +19,11 @@ public class Pikachu {
   private int id;
   private int backgroundId;
   private boolean selected;
-  private final Position position;
+  private Position position;
+
+  public Pikachu(Position position) {
+    this.position = position;
+  }
 
   public Pikachu(
       int size,
@@ -40,28 +44,12 @@ public class Pikachu {
     this.position = position;
   }
 
-  public void setSize(int size) {
-    this.size = size;
-  }
-
   public int getxAxis() {
     return xAxis;
   }
 
-  public void setxAxis(int xAxis) {
-    this.xAxis = xAxis;
-  }
-
   public int getyAxis() {
     return yAxis;
-  }
-
-  public void setyAxis(int yAxis) {
-    this.yAxis = yAxis;
-  }
-
-  public void setImage(Image image) {
-    this.image = image;
   }
 
   public int getId() {
@@ -88,6 +76,32 @@ public class Pikachu {
     return position;
   }
 
+  public void setPosition(Position position) {
+    this.position = position;
+  }
+
+  @Override
+  public String toString() {
+    return "Pikachu{"
+        + "size="
+        + size
+        + ", xAxis="
+        + xAxis
+        + ", yAxis="
+        + yAxis
+        + ", image="
+        + image
+        + ", id="
+        + id
+        + ", backgroundId="
+        + backgroundId
+        + ", selected="
+        + selected
+        + ", position="
+        + position
+        + '}';
+  }
+
   public void draw(Graphics2D g2d) {
     g2d.drawImage(IMG_BG_PI[backgroundId], xAxis, yAxis, size, size, null);
     g2d.drawImage(image, xAxis, yAxis, size, size, null);
@@ -103,7 +117,7 @@ public class Pikachu {
     private Image image;
     private int id;
     private int backgroundId;
-    private boolean selected = false;
+    private boolean selected;
     private Position position;
 
     public PikachuBuilder size(int size) {
@@ -128,16 +142,6 @@ public class Pikachu {
 
     public PikachuBuilder id(int id) {
       this.id = id;
-      return this;
-    }
-
-    public PikachuBuilder backgroundId(int backgroundId) {
-      this.backgroundId = backgroundId;
-      return this;
-    }
-
-    public PikachuBuilder selected(boolean selected) {
-      this.selected = selected;
       return this;
     }
 
