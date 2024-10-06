@@ -1,15 +1,11 @@
 package com.pika.desktop.app;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 
 public final class FindingPathAlgorithm {
 
-  public boolean find(Pikachu[][] grid, Pikachu start, Pikachu end) {
+  public boolean find(Pikachu[][] grid, Pikachu start, Pikachu end, int limitDirection) {
     if (hasNotSameId(start, end)) {
       return false;
     }
@@ -19,19 +15,22 @@ public final class FindingPathAlgorithm {
     int rows = grid.length;
     int cols = grid[0].length;
 
-    Queue<Pikachu> queue = new LinkedList<>();
+    Queue<PathNode> queue = new LinkedList<>();
     boolean[][] visited = new boolean[rows][cols];
 
-    addToQueue(queue, start, visited);
+    // Add the start node with 0 direction changes and a null initial direction
+    addToQueue(queue, start, visited, null, 0);
 
     while (!queue.isEmpty()) {
-      Pikachu current = queue.poll();
+      PathNode currentNode = queue.poll();
+      Pikachu current = currentNode.pikachu;
 
       if (isValidItem(current, end)) {
+        resetAllowCross(end);
         return true;
       }
 
-      exploreNeighbors(grid, current, queue, visited);
+      exploreNeighbors(grid, currentNode, queue, visited, limitDirection);
     }
 
     resetAllowCross(end);
@@ -48,27 +47,6 @@ public final class FindingPathAlgorithm {
 
   private void resetAllowCross(Pikachu pikachu) {
     setAllowCross(pikachu, false);
-  }
-
-  private void addToQueue(Queue<Pikachu> queue, Pikachu start, boolean[][] visited) {
-    queue.add(start);
-    visited[start.getPosition().getRowIndex()][start.getPosition().getColumnIndex()] = true;
-  }
-
-  private void exploreNeighbors(
-      Pikachu[][] grid, Pikachu current, Queue<Pikachu> queue, boolean[][] visited) {
-    int x = current.getPosition().getRowIndex();
-    int y = current.getPosition().getColumnIndex();
-
-    for (Direction direction : Direction.values()) {
-      int newX = x + direction.getDx();
-      int newY = y + direction.getDy();
-
-      if (isValid(grid, newX, newY, visited)) {
-        queue.add(grid[newX][newY]);
-        visited[newX][newY] = true;
-      }
-    }
   }
 
   private boolean isValidItem(Pikachu source, Pikachu target) {
@@ -92,71 +70,51 @@ public final class FindingPathAlgorithm {
     return x >= 0 && x < rows && y >= 0 && y < cols;
   }
 
-  public List<Position> findWithPath(Pikachu[][] grid, Pikachu start, Pikachu end) {
-    if (hasNotSameId(start, end)) {
-      return Collections.emptyList(); // Return empty if no path found
-    }
-
-    setAllowCross(end, true);
-
-    int rows = grid.length;
-    int cols = grid[0].length;
-
-    Queue<Pikachu> queue = new LinkedList<>();
-    boolean[][] visited = new boolean[rows][cols];
-    Map<Pikachu, Pikachu> previousNodeMap =
-        new HashMap<>(); // To store the previous Pikachu in the path
-
-    addToQueue(queue, start, visited);
-
-    while (!queue.isEmpty()) {
-      Pikachu current = queue.poll();
-
-      if (isValidItem(current, end)) {
-        List<Position> path = buildPath(previousNodeMap, current); // Build and return the path
-        setAllowCross(end, false);
-        return path;
-      }
-
-      exploreNeighborsWithPathTracking(grid, current, queue, visited, previousNodeMap);
-    }
-
-    setAllowCross(end, false);
-    return Collections.emptyList(); // No path found
+  private void addToQueue(
+      Queue<PathNode> queue,
+      Pikachu pikachu,
+      boolean[][] visited,
+      Direction direction,
+      int directionChanges) {
+    queue.add(new PathNode(pikachu, direction, directionChanges));
+    visited[pikachu.getPosition().getRowIndex()][pikachu.getPosition().getColumnIndex()] = true;
   }
 
-  // Track the previous nodes and keep the trail of how you reached the current node
-  private void exploreNeighborsWithPathTracking(
+  private void exploreNeighbors(
       Pikachu[][] grid,
-      Pikachu current,
-      Queue<Pikachu> queue,
+      PathNode currentNode,
+      Queue<PathNode> queue,
       boolean[][] visited,
-      Map<Pikachu, Pikachu> previousNodeMap) {
-    int x = current.getPosition().getRowIndex();
-    int y = current.getPosition().getColumnIndex();
+      int limitDirection) {
+    int x = currentNode.pikachu.getPosition().getRowIndex();
+    int y = currentNode.pikachu.getPosition().getColumnIndex();
+    Direction previousDirection = currentNode.direction;
+    int currentDirectionChanges = currentNode.directionChanges;
 
     for (Direction direction : Direction.values()) {
       int newX = x + direction.getDx();
       int newY = y + direction.getDy();
 
-      if (isValid(grid, newX, newY, visited)) {
-        Pikachu nextPikachu = grid[newX][newY];
-        queue.add(nextPikachu);
+      // Calculate direction changes: increase if direction has changed
+      int newDirectionChanges =
+          previousDirection == direction ? currentDirectionChanges : currentDirectionChanges + 1;
+
+      if (isValid(grid, newX, newY, visited) && newDirectionChanges <= limitDirection) {
+        queue.add(new PathNode(grid[newX][newY], direction, newDirectionChanges));
         visited[newX][newY] = true;
-        previousNodeMap.put(nextPikachu, current); // Store the path (from current to next)
       }
     }
   }
 
-  // Build the path by backtracking using the previousNodeMap
-  private List<Position> buildPath(Map<Pikachu, Pikachu> previousNodeMap, Pikachu current) {
-    List<Position> path = new LinkedList<>();
+  private static class PathNode {
+    Pikachu pikachu;
+    Direction direction;
+    int directionChanges;
 
-    while (current != null) {
-      path.add(0, current.getPosition()); // Add the position to the front (reverse backtracking)
-      current = previousNodeMap.get(current);
+    PathNode(Pikachu pikachu, Direction direction, int directionChanges) {
+      this.pikachu = pikachu;
+      this.direction = direction;
+      this.directionChanges = directionChanges;
     }
-
-    return path;
   }
 }

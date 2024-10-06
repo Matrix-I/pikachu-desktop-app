@@ -53,7 +53,7 @@ public class MouseEventHandler implements MouseEvent {
   }
 
   private void handleSelectedItems(Pikachu[][] pikachus, List<Pikachu> pikachuList) {
-    if (algorithm.find(map, selectedFirstItem, selectedSecondItem)) {
+    if (algorithm.find(map, selectedFirstItem, selectedSecondItem, 3)) {
       clearSelectedItems();
       markAllowCross();
       removeMatchItem(pikachus, pikachuList);
